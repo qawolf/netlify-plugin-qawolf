@@ -1,8 +1,5 @@
-// This is the main file for the Netlify Build plugin qawolf.
-// Please read the comments to learn more about the Netlify Build plugin syntax.
-// Find more information in the Netlify documentation.
+const { runQaWolfTests } = require('./qawolf')
 
-/* eslint-disable no-unused-vars */
 module.exports = {
   // The plugin main logic uses `on...` event handlers that are triggered on
   // each new Netlify Build.
@@ -86,21 +83,13 @@ module.exports = {
     // Display success information
     status.show({ summary: 'Success!' })
   },
-
-  // Other available event handlers
-
-  // // Before build commands are executed
-  // onPreBuild() {},
-  // // Build commands are executed
-  // onBuild() {},
   // // After Build commands are executed
-  onPostBuild(args) {
-    console.log('ARGS', args)
+  onPostBuild: async ({ utils }) => {
+    // console.log('ARGS', args.utils.git)
+    // console.log('PR', process.env.PULL_REQUEST)
+
+    await runQaWolfTests('onPostBuild', utils.build)
   },
   // Runs on build success
   // onSuccess() {},
-  // // Runs on build error
-  // onError() {},
-  // // Runs on build error or success
-  // onEnd() {},
 }
