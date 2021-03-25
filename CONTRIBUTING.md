@@ -51,22 +51,10 @@ The local Build configuration file is [`netlify.toml`](/netlify.toml) and can be
 modified.
 
 ```bash
-npm run ava
-```
-
-Runs [unit tests](/test/index.js).
-
-```bash
 npm run lint
 ```
 
 Lints and prettifies source files.
-
-```bash
-npm test
-```
-
-Runs both unit tests and linting.
 
 ```bash
 npm run release

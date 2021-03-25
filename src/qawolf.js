@@ -1,74 +1,112 @@
+const retry = require('async-retry')
 const axios = require('axios')
 
 const qaWolfUrl = process.env.QAWOLF_URL || 'https://www.qawolf.com'
 
-const retryFn = async (fn) => {
-  let attempts = 0
+const createQaWolfSuites = async (netlifyEvent, statusUtils) => {
+  return retry(async (_, attempt) => {
+    statusUtils.show('qawolf: create suite attempt', attempt)
 
-  while (attempts < 4) {
-    try {
-      const result = await fn()
-      return result
-    } catch (e) {
-      attempts++
-      await new Promise((r) => setTimeout(r, 1000))
-    }
-  }
-
-  return fn()
-}
-
-const createQaWolfSuites = async (netlify_event) => {
-  const deployment_environment = process.env.CONTEXT
-  const deployment_url = process.env.DEPLOY_PRIME_URL
-  const unique_deployment_url = process.env.DEPLOY_URL
-
-  return retryFn(async () => {
-    const { data } = await axios.post(
+    const {
+      data: { suite_ids },
+    } = await axios.post(
       `${qaWolfUrl}/api/netlify/suites`,
       {
-        deployment_environment,
-        deployment_url,
-        netlify_event,
-        unique_deployment_url,
+        deployment_environment: process.env.CONTEXT,
+        deployment_url: process.env.DEPLOY_PRIME_URL,
+        git_branch: process.env.HEAD,
+        netlify_event: netlifyEvent,
+        pull_request_id: process.env.REVIEW_ID,
+        repo_url: process.env.REPOSITORY_URL,
+        sha: process.env.COMMIT_REF,
+        unique_deployment_url: process.env.DEPLOY_URL,
       },
       { headers: { authorization: process.env.QAWOLF_API_KEY } },
     )
-    console.log('DATA', data)
 
-    return data.suite_ids
+    statusUtils.show(`qawolf: created ${suite_ids.length} suites`)
+
+    return suite_ids
   })
 }
 
-const getQaWolfSuite = async (suiteId) => {
-  return retryFn(async () => {
-    const { data } = await axios.get(
-      `${qaWolfUrl}/api/suites/${suiteId}`,
-      {
-        deployment_environment,
-        deployment_url,
-        netlify_event,
-        unique_deployment_url,
-      },
-      { headers: { authorization: process.env.QAWOLF_API_KEY } },
-    )
-    console.log('DATA', data)
+const waitForQaWolfSuite = async (suiteId, statusUtils) => {
+  const timeoutMs = 30 * 60 * 1000 // 30 minutes
+  let timeout = false
 
-    return data.suite_ids
+  statusUtils.show(`qawolf: wait for suite ${suiteId} to run`)
+
+  const requestPromise = retry(
+    async () => {
+      if (timeout) return
+
+      const { data } = await axios.get(`${qaWolfUrl}/api/suites/${suiteId}`, {
+        headers: { authorization: process.env.QAWOLF_API_KEY },
+      })
+
+      if (!data.is_complete) {
+        throw new Error('suite not complete')
+      }
+
+      statusUtils.show(`qawolf: suite ${suiteId} ${data.status}ed`)
+
+      return data
+    },
+    {
+      factor: 1,
+      maxTimeout: 5000,
+      minTimeout: 5000,
+      retries: Math.round(timeoutMs / 5000),
+    },
+  )
+
+  const timeoutPromise = new Promise((_, reject) => {
+    setTimeout(() => {
+      timeout = true
+      reject(new Error(`Suite ${suiteId} did not complete before timeout`))
+    }, timeoutMs)
   })
+
+  return Promise.race([requestPromise, timeoutPromise])
 }
 
-const runQaWolfTests = async (netlify_event, buildUtils) => {
+const runQaWolfTests = async (netlifyEvent, utils) => {
+  const buildUtils = utils.build
+  const statusUtils = utils.status
+
   if (!process.env.CONTEXT) {
-    buildUtils.failBuild('No context')
+    buildUtils.failBuild('qawolf: no context')
   } else if (!process.env.QAWOLF_API_KEY) {
-    buildUtils.failBuild('Must set QAWOLF_API_KEY environment variable')
-    //   } else if (!process.env.DEPLOY_PRIME_URL) {
-    //     buildUtils.failBuild('No deployment URL')
-    //   }
+    buildUtils.failBuild('qawolf: must set QAWOLF_API_KEY environment variable')
+  } else if (!process.env.DEPLOY_PRIME_URL || !process.env.DEPLOY_URL) {
+    buildUtils.failBuild('qawolf: no deployment URL')
   }
 
-  const suiteIds = await createQaWolfSuites(netlify_event)
+  try {
+    const suiteIds = await createQaWolfSuites(netlifyEvent, statusUtils)
+
+    const suites = await Promise.all(
+      suiteIds.map((suiteId) => waitForQaWolfSuite(suiteId, statusUtils)),
+    )
+
+    const failingSuite = suites.find((s) => s.status === 'fail')
+
+    if (failingSuite && netlifyEvent === 'onPostBuild') {
+      buildUtils.failBuild(
+        `qawolf: tests failed, details at ${qaWolfUrl}/suites/${failingSuite.id}`,
+      )
+    }
+
+    statusUtils.show('qawolf: complete')
+  } catch (error) {
+    const message = `qawolf: failed with error ${error.message}`
+
+    if (netlifyEvent === 'onPostBuild') {
+      buildUtils.failBuild(message)
+    } else {
+      buildUtils.failPlugin(message)
+    }
+  }
 }
 
 module.exports = { runQaWolfTests }
