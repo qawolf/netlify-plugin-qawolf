@@ -3,9 +3,9 @@ const axios = require('axios')
 
 const qaWolfUrl = process.env.QAWOLF_URL || 'https://www.qawolf.com'
 
-const createQaWolfSuites = async (netlifyEvent, statusUtils) => {
+const createQaWolfSuites = async (netlifyEvent) => {
   return retry(async (_, attempt) => {
-    statusUtils.show('qawolf: create suite attempt', attempt)
+    console.log('qawolf: create suite attempt', attempt)
 
     const {
       data: { suite_ids },
@@ -24,17 +24,19 @@ const createQaWolfSuites = async (netlifyEvent, statusUtils) => {
       { headers: { authorization: process.env.QAWOLF_API_KEY } },
     )
 
-    statusUtils.show(`qawolf: created ${suite_ids.length} suites`)
+    console.log(
+      `qawolf: created ${suite_ids.length} suites for url ${process.env.DEPLOY_PRIME_URL}`,
+    )
 
     return suite_ids
   })
 }
 
-const waitForQaWolfSuite = async (suiteId, statusUtils) => {
+const waitForQaWolfSuite = async (suiteId) => {
   const timeoutMs = 30 * 60 * 1000 // 30 minutes
   let timeout = false
 
-  statusUtils.show(`qawolf: wait for suite ${suiteId} to run`)
+  console.log(`qawolf: wait for suite ${suiteId} to run`)
 
   const requestPromise = retry(
     async () => {
@@ -48,7 +50,7 @@ const waitForQaWolfSuite = async (suiteId, statusUtils) => {
         throw new Error('suite not complete')
       }
 
-      statusUtils.show(`qawolf: suite ${suiteId} ${data.status}ed`)
+      console.log(`qawolf: suite ${suiteId} ${data.status}ed`)
 
       return data
     },
@@ -72,7 +74,6 @@ const waitForQaWolfSuite = async (suiteId, statusUtils) => {
 
 const runQaWolfTests = async (netlifyEvent, utils) => {
   const buildUtils = utils.build
-  const statusUtils = utils.status
 
   if (!process.env.CONTEXT) {
     buildUtils.failBuild('qawolf: no context')
@@ -83,10 +84,10 @@ const runQaWolfTests = async (netlifyEvent, utils) => {
   }
 
   try {
-    const suiteIds = await createQaWolfSuites(netlifyEvent, statusUtils)
+    const suiteIds = await createQaWolfSuites(netlifyEvent)
 
     const suites = await Promise.all(
-      suiteIds.map((suiteId) => waitForQaWolfSuite(suiteId, statusUtils)),
+      suiteIds.map((suiteId) => waitForQaWolfSuite(suiteId)),
     )
 
     const failingSuite = suites.find((s) => s.status === 'fail')
@@ -97,16 +98,10 @@ const runQaWolfTests = async (netlifyEvent, utils) => {
       )
     }
 
-    statusUtils.show('qawolf: complete')
+    utils.status.show({ summary: 'qawolf: complete' })
   } catch (error) {
-    const message = `qawolf: failed with error ${error.message}`
-
-    if (netlifyEvent === 'onPostBuild') {
-      buildUtils.failBuild(message)
-    } else {
-      buildUtils.failPlugin(message)
-    }
+    buildUtils.failPlugin(`qawolf: failed with error ${error.message}`)
   }
 }
 
-module.exports = { runQaWolfTests }
+module.exports = { createQaWolfSuites, runQaWolfTests, waitForQaWolfSuite }
