@@ -1,7 +1,7 @@
 {
   "name": "netlify-plugin-qawolf",
   "version": "0.0.1",
-  "description": "Netlify Build plugin - Run QA Wolf tests on Netlify deployments",
+  "description": "Netlify Build plugin to run QA Wolf tests on deployments",
   "main": "src/index.js",
   "files": [
     "src/**/*.js",
@@ -27,11 +27,10 @@
   },
   "scripts": {
     "build": "netlify-build",
-    "test": "npm run lint && npm run ava",
+    "test": "jest",
     "lint": "npm run eslint && npm run prettier",
     "eslint": "eslint --ignore-path .gitignore --fix --cache --format=codeframe --max-warnings=0 \"{src,init}/**/*.js\"",
     "prettier": "prettier --ignore-path .gitignore --write --loglevel warn \"{.github,src,init}/**/*.{js,md,yml,json}\" \"*.{js,md,yml,json}\"",
-    "ava": "cross-env FORCE_COLOR=1 ava --verbose",
     "release": "release-it"
   },
   "devDependencies": {
