@@ -24,7 +24,9 @@ const createQaWolfSuites = async (netlifyEvent) => {
       { headers: { authorization: process.env.QAWOLF_API_KEY } },
     )
 
-    console.log(`qawolf: created ${suite_ids.length} suites`)
+    console.log(
+      `qawolf: created ${suite_ids.length} suites for url ${process.env.DEPLOY_PRIME_URL}`,
+    )
 
     return suite_ids
   })
