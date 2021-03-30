@@ -66,4 +66,13 @@ describe('runQaWolfTests', () => {
       failBuild.mock.calls[failBuild.mock.calls.length - 1][0],
     ).not.toMatch('qawolf: tests failed')
   })
+
+  it('allows skipping the plugin', async () => {
+    process.env.QAWOLF_SKIP = 'true'
+
+    await qawolf.runQaWolfTests('onSuccess', utils)
+
+    expect(show.mock.calls).toHaveLength(1)
+    expect(show.mock.calls[0][0]).toEqual({ summary: 'qawolf: skip' })
+  })
 })

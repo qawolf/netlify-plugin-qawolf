@@ -20,7 +20,6 @@ const createQaWolfSuites = async (netlifyEvent) => {
         pull_request_id: process.env.REVIEW_ID,
         repo_url: process.env.REPOSITORY_URL,
         sha: process.env.COMMIT_REF,
-        skip: process.env.QAWOLF_SKIP,
         unique_deployment_url: process.env.DEPLOY_URL,
       },
       { headers: { authorization: process.env.QAWOLF_API_KEY } },
@@ -75,6 +74,12 @@ const waitForQaWolfSuite = async (suiteId) => {
 }
 
 const runQaWolfTests = async (netlifyEvent, utils) => {
+  const skip = process.env.QAWOLF_SKIP
+  if (skip && ['1', 'true', 't'].includes(skip.toLowerCase())) {
+    utils.status.show({ summary: 'qawolf: skip' })
+    return
+  }
+
   const buildUtils = utils.build
 
   if (!process.env.CONTEXT) {
