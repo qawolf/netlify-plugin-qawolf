@@ -91,16 +91,25 @@ const runQaWolfTests = async (netlifyEvent, utils) => {
     )
 
     const failingSuite = suites.find((s) => s.status === 'fail')
+    const summary = failingSuite
+      ? `qawolf: tests failed, details at ${qaWolfUrl}/suites/${failingSuite.id}`
+      : 'qawolf: tests passed'
 
     if (failingSuite && netlifyEvent === 'onPostBuild') {
-      buildUtils.failBuild(
-        `qawolf: tests failed, details at ${qaWolfUrl}/suites/${failingSuite.id}`,
-      )
+      buildUtils.failBuild(summary)
+    } else {
+      utils.status.show({ summary })
     }
 
     utils.status.show({ summary: 'qawolf: complete' })
   } catch (error) {
-    buildUtils.failPlugin(`qawolf: failed with error ${error.message}`)
+    const message = `qawolf: failed with error ${error.message}`
+
+    if (netlifyEvent === 'onPostBuild') {
+      buildUtils.failBuild(message)
+    } else {
+      buildUtils.failPlugin(message)
+    }
   }
 }
 
