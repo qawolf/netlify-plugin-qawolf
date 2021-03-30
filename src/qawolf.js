@@ -4,6 +4,10 @@ const axios = require('axios')
 const qawolfTitle = '🐺 qawolf'
 const qaWolfUrl = process.env.QAWOLF_URL || 'https://www.qawolf.com'
 
+const buildSuiteUrl = (suiteId) => {
+  return `${qaWolfUrl}/suites/${suiteId}`
+}
+
 const createQaWolfSuites = async (netlifyEvent) => {
   return retry(async (_, attempt) => {
     console.log(`${qawolfTitle}: create suites attempt`, attempt)
@@ -38,7 +42,11 @@ const waitForQaWolfSuite = async (suiteId) => {
   const timeoutMs = 30 * 60 * 1000 // 30 minutes
   let timeout = false
 
-  console.log(`${qawolfTitle}: wait for suite ${suiteId} to run`)
+  console.log(
+    `${qawolfTitle}: wait for suite to run, details at ${buildSuiteUrl(
+      suiteId,
+    )}`,
+  )
 
   const requestPromise = retry(
     async () => {
@@ -52,7 +60,7 @@ const waitForQaWolfSuite = async (suiteId) => {
         throw new Error('suite not complete')
       }
 
-      console.log(`${qawolfTitle}: suite ${suiteId} ${data.status}ed`)
+      console.log(`${qawolfTitle}: suite ${data.status}ed`)
 
       return data
     },
@@ -103,11 +111,9 @@ const runQaWolfTests = async (netlifyEvent, utils) => {
     const failingSuite = suites.find((s) => s.status === 'fail')
 
     const summary = failingSuite
-      ? `tests failed, details at ${qaWolfUrl}/suites/${failingSuite.id}`
+      ? `tests failed, details at ${buildSuiteUrl(failingSuite.id)}`
       : 'tests passed'
-    const text = suiteIds
-      .map((suiteId) => `${qaWolfUrl}/suites/${suiteId}`)
-      .join('\n')
+    const text = suiteIds.map((suiteId) => buildSuiteUrl(suiteId)).join('\n')
 
     if (failingSuite && netlifyEvent === 'onPostBuild') {
       buildUtils.failBuild(summary)
@@ -119,7 +125,7 @@ const runQaWolfTests = async (netlifyEvent, utils) => {
     console.log(`${qawolfTitle}: complete`)
   } catch (error) {
     const message = error.message.includes('tests failed')
-      ? `${qawolfTitle}: ${message}`
+      ? `${qawolfTitle}: ${error.message}`
       : `${qawolfTitle}: failed with error ${error.message}`
 
     if (netlifyEvent === 'onPostBuild') {
