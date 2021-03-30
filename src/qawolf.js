@@ -1,7 +1,7 @@
 const retry = require('async-retry')
 const axios = require('axios')
 
-const qawolfTitle = 'qawolf'
+const qawolfTitle = '🐺 qawolf'
 const qaWolfUrl = process.env.QAWOLF_URL || 'https://www.qawolf.com'
 
 const createQaWolfSuites = async (netlifyEvent) => {
@@ -75,18 +75,9 @@ const waitForQaWolfSuite = async (suiteId) => {
 }
 
 const runQaWolfTests = async (netlifyEvent, utils) => {
-  if (process.env.PULL_REQUEST === 'true') {
-    console.log('SHOW', utils.status.show)
-    utils.status.show({ title: 'TEST', text: 'TEXT', summary: 'HERE' })
-  }
-
   const skip = process.env.QAWOLF_SKIP
   if (skip && ['1', 'true', 't'].includes(skip.toLowerCase())) {
-    utils.status.show({
-      summary: 'skip',
-      text: `QAWOLF_SKIP=${skip}`,
-      title: qawolfTitle,
-    })
+    utils.status.show({ summary: 'skip', text: `QAWOLF_SKIP=${skip}` })
     return
   }
 
@@ -118,10 +109,11 @@ const runQaWolfTests = async (netlifyEvent, utils) => {
     if (failingSuite && netlifyEvent === 'onPostBuild') {
       buildUtils.failBuild(`${qawolfTitle}: ${summary}`)
     } else {
-      utils.status.show({ summary, text, title: qawolfTitle })
+      utils.status.show({ summary, text })
     }
 
-    utils.status.show({ summary: 'complete', text: '🐺', title: qawolfTitle })
+    utils.status.show({ summary: 'complete', text: '🐺' })
+    console.log(`${qawolfTitle}: complete`)
   } catch (error) {
     const message = `${qawolfTitle} failed with error ${error.message}`
 
