@@ -75,6 +75,11 @@ const waitForQaWolfSuite = async (suiteId) => {
 }
 
 const runQaWolfTests = async (netlifyEvent, utils) => {
+  if (process.env.PULL_REQUEST === 'true') {
+    console.log('SHOW', utils.status.show)
+    utils.status.show({ title: 'TEST', text: 'TEXT', summary: 'HERE' })
+  }
+
   const skip = process.env.QAWOLF_SKIP
   if (skip && ['1', 'true', 't'].includes(skip.toLowerCase())) {
     utils.status.show({
