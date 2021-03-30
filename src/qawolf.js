@@ -75,7 +75,7 @@ const waitForQaWolfSuite = async (suiteId) => {
 
 const runQaWolfTests = async (netlifyEvent, utils) => {
   const skip = process.env.QAWOLF_SKIP
-  if (skip && ['true', 't'].includes(skip.toLowerCase())) {
+  if (skip && ['1', 'true', 't'].includes(skip.toLowerCase())) {
     utils.status.show({ summary: 'qawolf: skip' })
     return
   }
