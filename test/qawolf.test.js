@@ -34,7 +34,8 @@ describe('runQaWolfTests', () => {
       failBuild.mock.calls[failBuild.mock.calls.length - 1][0],
     ).not.toMatch('tests failed')
 
-    expect(show.mock.calls[0][0]).toEqual({ summary: 'qawolf: complete' })
+    expect(show.mock.calls[0][0]).toEqual({ summary: 'qawolf: tests passed' })
+    expect(show.mock.calls[1][0]).toEqual({ summary: 'qawolf: complete' })
   })
 
   it('handles QA Wolf tests failing onPostBuild', async () => {
