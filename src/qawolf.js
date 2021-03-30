@@ -124,9 +124,7 @@ const runQaWolfTests = async (netlifyEvent, utils) => {
     utils.status.show({ summary: 'complete', text: '🐺' })
     console.log(`${qawolfTitle}: complete`)
   } catch (error) {
-    const message = error.message.includes('tests failed')
-      ? `${qawolfTitle}: ${error.message}`
-      : `${qawolfTitle}: failed with error ${error.message}`
+    const message = `${qawolfTitle}: failed with message ${error.message}`
 
     if (netlifyEvent === 'onPostBuild') {
       buildUtils.failBuild(message)
