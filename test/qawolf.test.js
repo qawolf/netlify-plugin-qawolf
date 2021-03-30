@@ -36,10 +36,12 @@ describe('runQaWolfTests', () => {
 
     expect(show.mock.calls[0][0]).toEqual({
       summary: 'tests passed',
+      text: 'https://www.qawolf.com/suites/suiteId',
       title: 'qawolf',
     })
     expect(show.mock.calls[1][0]).toEqual({
       summary: 'complete',
+      text: '🐺',
       title: 'qawolf',
     })
   })
@@ -79,6 +81,10 @@ describe('runQaWolfTests', () => {
     await qawolf.runQaWolfTests('onSuccess', utils)
 
     expect(show.mock.calls).toHaveLength(1)
-    expect(show.mock.calls[0][0]).toEqual({ summary: 'skip', title: 'qawolf' })
+    expect(show.mock.calls[0][0]).toEqual({
+      summary: 'skip',
+      text: 'QAWOLF_SKIP=true',
+      title: 'qawolf',
+    })
   })
 })

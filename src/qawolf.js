@@ -52,7 +52,7 @@ const waitForQaWolfSuite = async (suiteId) => {
         throw new Error('suite not complete')
       }
 
-      console.log(`${qawolfTitle} suite ${suiteId} ${data.status}ed`)
+      console.log(`${qawolfTitle}: suite ${suiteId} ${data.status}ed`)
 
       return data
     },
@@ -77,7 +77,11 @@ const waitForQaWolfSuite = async (suiteId) => {
 const runQaWolfTests = async (netlifyEvent, utils) => {
   const skip = process.env.QAWOLF_SKIP
   if (skip && ['1', 'true', 't'].includes(skip.toLowerCase())) {
-    utils.status.show({ summary: 'skip', title: qawolfTitle })
+    utils.status.show({
+      summary: 'skip',
+      text: `QAWOLF_SKIP=${skip}`,
+      title: qawolfTitle,
+    })
     return
   }
 
@@ -101,17 +105,18 @@ const runQaWolfTests = async (netlifyEvent, utils) => {
     )
 
     const failingSuite = suites.find((s) => s.status === 'fail')
-    const summary = failingSuite
-      ? `tests failed, details at ${qaWolfUrl}/suites/${failingSuite.id}`
-      : 'tests passed'
+    const summary = failingSuite ? 'tests failed' : 'tests passed'
+    const text = suiteIds
+      .map((suiteId) => `${qaWolfUrl}/suites/${suiteId}`)
+      .join('\n')
 
     if (failingSuite && netlifyEvent === 'onPostBuild') {
       buildUtils.failBuild(`${qawolfTitle}: ${summary}`)
     } else {
-      utils.status.show({ summary, title: qawolfTitle })
+      utils.status.show({ summary, text, title: qawolfTitle })
     }
 
-    utils.status.show({ summary: 'complete', title: qawolfTitle })
+    utils.status.show({ summary: 'complete', text: '🐺', title: qawolfTitle })
   } catch (error) {
     const message = `${qawolfTitle} failed with error ${error.message}`
 
