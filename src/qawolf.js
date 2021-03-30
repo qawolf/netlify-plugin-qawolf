@@ -101,13 +101,16 @@ const runQaWolfTests = async (netlifyEvent, utils) => {
     )
 
     const failingSuite = suites.find((s) => s.status === 'fail')
-    const summary = failingSuite ? 'tests failed' : 'tests passed'
+
+    const summary = failingSuite
+      ? `tests failed, details at ${qaWolfUrl}/suites/${failingSuite.id}`
+      : 'tests passed'
     const text = suiteIds
       .map((suiteId) => `${qaWolfUrl}/suites/${suiteId}`)
       .join('\n')
 
     if (failingSuite && netlifyEvent === 'onPostBuild') {
-      buildUtils.failBuild(`${qawolfTitle}: ${summary}`)
+      buildUtils.failBuild(summary)
     } else {
       utils.status.show({ summary, text })
     }
@@ -115,7 +118,9 @@ const runQaWolfTests = async (netlifyEvent, utils) => {
     utils.status.show({ summary: 'complete', text: '🐺' })
     console.log(`${qawolfTitle}: complete`)
   } catch (error) {
-    const message = `${qawolfTitle} failed with error ${error.message}`
+    const message = error.message.includes('tests failed')
+      ? `${qawolfTitle}: ${message}`
+      : `${qawolfTitle}: failed with error ${error.message}`
 
     if (netlifyEvent === 'onPostBuild') {
       buildUtils.failBuild(message)

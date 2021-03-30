@@ -53,7 +53,7 @@ describe('runQaWolfTests', () => {
     await qawolf.runQaWolfTests('onPostBuild', utils)
 
     expect(failBuild.mock.calls[failBuild.mock.calls.length - 1][0]).toMatch(
-      'qawolf: tests failed',
+      'tests failed, details at',
     )
   })
 
