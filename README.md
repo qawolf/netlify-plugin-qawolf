@@ -61,9 +61,9 @@ Check out
 uses the QA Wolf Netlify Build Plugin.
 
 Here are example deploy logs for
-[passing tests](https://app.netlify.com/sites/netlify-plugin-qawolf-example/deploys/60639a20d105e7000882c69d)
+[passing tests](https://app.netlify.com/sites/netlify-plugin-qawolf-example/deploys/6064aefcb533c70007dfcc12)
 and
-[failing tests](https://app.netlify.com/sites/netlify-plugin-qawolf-example/deploys/606399859279c70007f63ef0).
+[failing tests](https://app.netlify.com/sites/netlify-plugin-qawolf-example/deploys/6064b01d397472000743df87).
 
 ## Support
 
