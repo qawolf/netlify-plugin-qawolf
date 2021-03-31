@@ -1,6 +1,6 @@
 # netlify-plugin-qawolf
 
-Run QA Wolf tests on Netlifiy deployments 🐺
+Run QA Wolf tests on Netlify deployments 🐺
 
 See
 [QA Wolf documentation](https://spirit.qawolf.com/docs/run-tests-on-netlify-deployment)
