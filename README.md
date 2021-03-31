@@ -2,7 +2,9 @@
 
 Run QA Wolf tests on Netlifiy deployments 🐺
 
-See QA Wolf documentation for a detailed walkthrough.
+See
+[QA Wolf documentation](https://spirit.qawolf.com/docs/run-tests-on-netlify-deployment)
+for a detailed walkthrough.
 
 ## Overview
 
@@ -43,7 +45,7 @@ yarn add -D netlify-plugin-qawolf
   package = "netlify-plugin-qawolf"
 ```
 
-## Configuration
+## Environment Variables
 
 Create the `QAWOLF_API_KEY` environment variable in Netlify, and set it to your
 team's API key.
