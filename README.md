@@ -4,7 +4,7 @@ Run QA Wolf tests on Netlifiy deployments 🐺
 
 See QA Wolf documentation for a detailed walkthrough.
 
-# Overview
+## Overview
 
 This plugin allows you to run your [QA Wolf](https://www.qawolf.com/) tests on
 Netlify deployments.
@@ -13,13 +13,13 @@ QA Wolf is an [open source](https://github.com/qawolf/qawolf) tool to create,
 run, and maintain browser tests 10x faster. Your tests will run on Netlify
 deployments in 100% parallel, with no infrastructure setup required.
 
-# Install
+## Install
 
-## Install with Netlify UI (Recommended)
+### Install with Netlify UI (Recommended)
 
 Coming soon!
 
-## Install with npm
+### Install with npm
 
 1. From your project's base directory, use `npm`, `yarn`, or any other Node.js
    package manager to add this plugin to `devDependencies` in `package.json`:
@@ -43,7 +43,7 @@ yarn add -D netlify-plugin-qawolf
   package = "netlify-plugin-qawolf"
 ```
 
-# Configuration
+## Configuration
 
 Create the `QAWOLF_API_KEY` environment variable in Netlify, and set it to your
 team's API key.
@@ -52,18 +52,18 @@ See
 [these instructions](https://docs.netlify.com/configure-builds/environment-variables/#declare-variables)
 to learn about Netlify environment variables.
 
-# Demo
+## Demo
 
 Check out
 [this example project](https://github.com/qawolf/netlify-plugin-example) that
 uses the QA Wolf Netlify Build Plugin.
 
-Below are example deploy logs for
+Here are example deploy logs for
 [passing tests](https://app.netlify.com/sites/netlify-plugin-qawolf-example/deploys/60639a20d105e7000882c69d)
 and
-[failing tests](https://app.netlify.com/sites/netlify-plugin-qawolf-example/deploys/606399859279c70007f63ef0)
+[failing tests](https://app.netlify.com/sites/netlify-plugin-qawolf-example/deploys/606399859279c70007f63ef0).
 
-# Support
+## Support
 
 We want QA Wolf to work well for you, so please reach out for help! Join our
 [Slack community](https://slack.qawolf.com) or email us at hello@qawolf.com.
