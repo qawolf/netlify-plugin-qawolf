@@ -1,6 +1,6 @@
 {
   "name": "netlify-plugin-qawolf",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Netlify Build plugin to run QA Wolf tests on deployments",
   "main": "src/index.js",
   "files": [
