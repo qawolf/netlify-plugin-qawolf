@@ -3,7 +3,7 @@
 Run QA Wolf tests on Netlifiy deployments 🐺
 
 See
-[QA Wolf documentation](https://spirit.qawolf.com/docs/run-tests-on-netlify-deployment)
+[QA Wolf documentation](https://www.qawolf.com/docs/run-tests-on-netlify-deployment)
 for a detailed walkthrough.
 
 ## Overview
@@ -19,7 +19,11 @@ deployments in 100% parallel, with no infrastructure setup required.
 
 ### Install with Netlify UI (Recommended)
 
-Coming soon!
+Install the QA Wolf Build Plugin from the Netlify UI with this
+[direct installation link](https://app.netlify.com/plugins/netlify-plugin-qawolf/install).
+
+The QA Wolf Build Plugin is also listed in the
+[Netlify Plugins directory](https://app.netlify.com/plugins).
 
 ### Install with npm
 
