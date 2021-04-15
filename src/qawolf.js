@@ -4,11 +4,18 @@ const axios = require('axios')
 const qawolfTitle = '🐺 qawolf:'
 const qaWolfUrl = process.env.QAWOLF_URL || 'https://www.qawolf.com'
 
+const buildCommittedAt = (commits) => {
+  const commit = commits.find((c) => c.sha === process.env.COMMIT_REF)
+  if (!commit) return null
+
+  return commit.committer.date || commit.author.date
+}
+
 const buildSuiteUrl = (suiteId) => {
   return `${qaWolfUrl}/suites/${suiteId}`
 }
 
-const createQaWolfSuites = async () => {
+const createQaWolfSuites = async (commits) => {
   return retry(async (_, attempt) => {
     console.log(`${qawolfTitle} create suites attempt`, attempt)
 
@@ -17,6 +24,7 @@ const createQaWolfSuites = async () => {
     } = await axios.post(
       `${qaWolfUrl}/api/netlify/suites`,
       {
+        committed_at: buildCommittedAt(commits),
         deployment_environment: process.env.CONTEXT,
         deployment_url: process.env.DEPLOY_PRIME_URL,
         git_branch: process.env.HEAD,
@@ -101,7 +109,7 @@ const runQaWolfTests = async (utils) => {
   }
 
   try {
-    const suiteIds = await createQaWolfSuites()
+    const suiteIds = await createQaWolfSuites(utils.git.commits)
 
     const suites = await Promise.all(
       suiteIds.map((suiteId) => waitForQaWolfSuite(suiteId)),
