@@ -8,6 +8,25 @@ const show = jest.fn()
 
 const utils = {
   build: { failPlugin },
+  git: {
+    commits: [
+      {
+        sha: 'sha',
+        parents: 'parents',
+        author: {
+          name: 'QA Wolf',
+          email: 'hello@qawolf.com',
+          date: '2021-04-01 12:28:54 -0600',
+        },
+        committer: {
+          name: 'QA Wolf',
+          email: 'hello@qawolf.com',
+          date: '2021-04-01 12:28:54 -0600',
+        },
+        message: 'Initial commit',
+      },
+    ],
+  },
   status: { show },
 }
 
@@ -15,6 +34,8 @@ describe('runQaWolfTests', () => {
   afterEach(() => jest.clearAllMocks())
 
   it('handles QA Wolf tests passing onSuccess', async () => {
+    process.env.COMMIT_REF = 'sha'
+
     axios.post.mockResolvedValueOnce({ data: { suite_ids: ['suiteId'] } })
     axios.get.mockResolvedValueOnce({
       data: { is_complete: true, status: 'pass' },
@@ -23,6 +44,10 @@ describe('runQaWolfTests', () => {
     await qawolf.runQaWolfTests(utils)
 
     const postArgs = axios.post.mock.calls[0]
+    expect(postArgs[1]).toMatchObject({
+      committed_at: '2021-04-01 12:28:54 -0600',
+      sha: 'sha',
+    })
     expect(postArgs[2]).toMatchObject({
       headers: { authorization: process.env.QAWOLF_API_KEY },
     })
