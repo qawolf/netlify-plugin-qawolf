@@ -4,11 +4,14 @@ const axios = require('axios')
 const qawolfTitle = '🐺 qawolf:'
 const qaWolfUrl = process.env.QAWOLF_URL || 'https://www.qawolf.com'
 
-const buildCommittedAt = (commits) => {
+const buildCommitFields = (commits) => {
   const commit = commits.find((c) => c.sha === process.env.COMMIT_REF)
-  if (!commit) return null
+  if (!commit) return {}
 
-  return commit.committer.date || commit.author.date
+  return {
+    committed_at: commit.committer.date || commit.author.date,
+    message: commit.message,
+  }
 }
 
 const buildSuiteUrl = (suiteId) => {
@@ -24,7 +27,6 @@ const createQaWolfSuites = async (commits) => {
     } = await axios.post(
       `${qaWolfUrl}/api/netlify/suites`,
       {
-        committed_at: buildCommittedAt(commits),
         deployment_environment: process.env.CONTEXT,
         deployment_url: process.env.DEPLOY_PRIME_URL,
         git_branch: process.env.HEAD,
@@ -33,6 +35,7 @@ const createQaWolfSuites = async (commits) => {
         repo_url: process.env.REPOSITORY_URL,
         sha: process.env.COMMIT_REF,
         unique_deployment_url: process.env.DEPLOY_URL,
+        ...buildCommitFields(commits),
       },
       { headers: { authorization: process.env.QAWOLF_API_KEY } },
     )
