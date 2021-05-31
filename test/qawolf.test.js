@@ -46,6 +46,7 @@ describe('runQaWolfTests', () => {
     const postArgs = axios.post.mock.calls[0]
     expect(postArgs[1]).toMatchObject({
       committed_at: '2021-04-01 12:28:54 -0600',
+      message: 'Initial commit',
       sha: 'sha',
     })
     expect(postArgs[2]).toMatchObject({
